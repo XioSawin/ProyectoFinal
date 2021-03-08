@@ -54,11 +54,11 @@ router.post('/agregar/:id_producto', (req, res) => { // add product to cart
 
     let idCart = (cart.length)+1;
 
-    let today = getTimestamp();
+    let timestamp = getTimestamp();
 
     const item = {
         id: idCart,
-        today,
+        timestamp,
         producto
     }
 
