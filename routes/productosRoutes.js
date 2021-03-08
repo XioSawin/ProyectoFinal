@@ -1,5 +1,5 @@
 // import clase producto
-const Producto = require('../producto');
+// const Producto = require('../producto');
 
 const { Router } = require("express");
 const router = Router();
@@ -7,6 +7,22 @@ const router = Router();
 // ruta
 
 // app.use('/productos', router);
+
+// timestamp
+function getTimestamp(){
+    let date = new Date();
+
+    let d = date.getDate();
+    let mo = date.getMonth() + 1;
+    let y = date.getFullYear();
+    let h = date.getHours();
+    let mi = date.getMinutes();
+    let s = date.getSeconds();
+
+    let today = d + '/' + mo + '/' + y + ' ' + h + ':' + mi + ':' + s;
+
+    return today;
+}
 
 // Lista de productos
 const productList = [];
@@ -17,9 +33,9 @@ const administrador = true;
 // Routes
 
 router.get('/listar/:id?', (req, res)=>{ // get info by id if given - listar productos
+    const { id } = req.params;
+    
     if(id){
-        const { id } = req.params;
-
         const producto = productList.find(producto => producto.id == id);
 
         if(!producto){ 
@@ -42,8 +58,18 @@ router.post('/agregar', (req, res) => { // post new product
 
     let id = (productList.length)+1;
 
-    const producto = new Producto(id, nombre, descripcion, codigo, foto, precio, stock);
-    producto.setTimestamp();
+    let timestamp = getTimestamp();
+
+    const producto = {
+        id, 
+        timestamp,
+        nombre, 
+        descripcion, 
+        codigo,
+        foto, 
+        precio, 
+        stock
+    }
 
     productList.push(producto);
     res.sendStatus(201);
@@ -52,7 +78,7 @@ router.post('/agregar', (req, res) => { // post new product
 router.patch('/actualizar/:id', (req, res) => { // actualizar producto x id
 
     if (!administrador){
-        res.json({error: -1, descripcion: "ruta no autorizada"});
+        res.json({error: 1, descripcion: "ruta no autorizada"});
     }
 
     const { id } = req.params;
@@ -65,7 +91,12 @@ router.patch('/actualizar/:id', (req, res) => { // actualizar producto x id
 
     const {nombre, descripcion, codigo, foto, precio, stock} = req.body;
 
-    producto.update(nombre, descripcion, codigo, foto, precio, stock);
+    producto.nombre = nombre;
+    producto.descripcion = descripcion;
+    producto.codigo = codigo;
+    producto.foto = foto;
+    producto.precio = precio;
+    producto.stock = stock;
     
     res.sendStatus(204);
 })
