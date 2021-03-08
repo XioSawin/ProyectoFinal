@@ -1,13 +1,13 @@
 // import clase producto
-//import Carrito from '../carrito.js';
-const productList = require('./productosRoutes');
 
 const { Router } = require("express");
 const router = Router();
+const fs = require('fs');
+const productos = require("/Users/xiomarasawin/Documents/Coding/Coderhouse/ProyectoFinal/routes/productosRoutes.js");
 
-// ruta
+// productList
 
-// app.use('/carrito', router);
+const productList = productos.productList;
 
 // Productos en carrito
 
@@ -31,8 +31,8 @@ function getTimestamp(){
 // Routes
 
 router.get('/listar/:id?', (req, res)=>{ // get info by id if given - listar productos
+    const { id } = req.params;
     if(id){
-        const { id } = req.params;
 
         const carrito = cart.find(carrito => carrito.id == id);
 
@@ -48,17 +48,19 @@ router.get('/listar/:id?', (req, res)=>{ // get info by id if given - listar pro
 
 router.post('/agregar/:id_producto', (req, res) => { // add product to cart
 
-    const { id } = req.body;
+    const { id_producto } = req.params;
+    console.log(productList);
 
-    const producto = productList.find(producto => producto.id == id);
+    const producto = productList.find(producto => producto.id == id_producto);
+    console.log(producto);
 
     let idCart = (cart.length)+1;
 
-    let timestamp = getTimestamp();
+    let today = getTimestamp();
 
     const item = {
         id: idCart,
-        timestamp,
+        today,
         producto
     }
 

@@ -1,6 +1,8 @@
 const express = require("express");
 const path = require('path');
+const router = express.Router();
 const app = express();
+const productos = require("/Users/xiomarasawin/Documents/Coding/Coderhouse/ProyectoFinal/routes/productosRoutes.js");
 
 // Settings
 app.set("PORT", process.env.PORT || 8080);
@@ -9,25 +11,8 @@ app.set("PORT", process.env.PORT || 8080);
 app.use(express.json());
 app.use(express.urlencoded({extended:true}));
 app.use(express.static(path.join(__dirname + "public")));
-app.use('/productos', require("./routes/productosRoutes"));
+app.use('/productos', productos.router);
 app.use('/carrito', require("./routes/carritoRoutes"));
-
-// timestamp
-
-function getTimestamp(){
-    let date = new Date();
-
-    let d = date.getDate();
-    let mo = date.getMonth() + 1;
-    let y = date.getFullYear();
-    let h = date.getHours();
-    let mi = date.getMinutes();
-    let s = date.getSeconds();
-
-    let today = d + '/' + mo + '/' + y + ' ' + h + ':' + mi + ':' + s;
-
-    return today;
-}
 
 // default
 

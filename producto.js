@@ -1,4 +1,4 @@
-module.exports = class Producto {
+class Producto {
     constructor (id, nombre, descripcion, codigo, foto, precio, stock){
         this.id = id,
         this.nombre = nombre, 
@@ -33,6 +33,9 @@ module.exports = class Producto {
         this.stock = stock;
     }
 }
+
+module.exports = Producto;
+
 /*
 {
     "nombre": "Botella",
@@ -41,4 +44,14 @@ module.exports = class Producto {
       "foto": "https://cdn.shopify.com/s/files/1/0448/5985/0917/products/IMG_8045_69d7ac42-1c6f-44af-997a-fe5248afc80a_1024x1024.jpg?v=1614586943",
       "precio": 35,
       "stock": 10
-  }*/
+  }
+  
+  {
+  "nombre": "Mochila",
+  "descripcion": "Mochila Aston Martin F1 TEAM 2021",
+  "codigo": "SEB1234",
+	"foto": "https://cdn.shopify.com/s/files/1/0448/5985/0917/products/AM21BAG01_20_282_29_20copy_1024x1024.png?v=1614333827",
+	"precio": 75,
+	"stock": 5
+}
+  */
