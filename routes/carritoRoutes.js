@@ -2,8 +2,7 @@
 
 const { Router } = require("express");
 const router = Router();
-const fs = require('fs');
-const productos = require("/Users/xiomarasawin/Documents/Coding/Coderhouse/ProyectoFinal/routes/productosRoutes.js");
+const productos = require("./productosRoutes.js");
 
 // productList
 
