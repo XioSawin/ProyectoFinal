@@ -1,8 +1,7 @@
 const express = require("express");
 const path = require('path');
-const router = express.Router();
 const app = express();
-const productos = require("/Users/xiomarasawin/Documents/Coding/Coderhouse/ProyectoFinal/routes/productosRoutes.js");
+const productos = require("./routes/productosRoutes");
 
 // Settings
 app.set("PORT", process.env.PORT || 8080);
