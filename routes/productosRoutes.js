@@ -1,6 +1,5 @@
 // required
 const { POINT_CONVERSION_COMPRESSED } = require('constants');
-const fs = require('fs');
 const Producto = require('../producto.js');
 const { Router } = require("express");
 const router = Router();
