@@ -1,5 +1,4 @@
 const express = require('express');
-//const { UserBindingContext } = require('twilio/lib/rest/chat/v2/service/user/userBinding');
 const app = express();
 
 app.engine(
@@ -16,9 +15,6 @@ app.set("views", "./views");
 app.use(express.static('public'));
 
 const productModel = require('./models/productos');
-
-// testing adming true
-// const administrador = true; 
 
 // obtener lista de productos all o por categoria
 const getProducts = (req, res, next) => {
