@@ -1,9 +1,21 @@
 // import clase producto
 
 const { Router } = require("express");
-const router = Router();
-const productos = require("./productosRoutes.js");
+const carritoController = require("../controllers/carritoController");
 
+const router = Router();
+
+router.get('/cart/:id', carritoController.getCarrito);
+router.post('/cart', carritoController.addProducto);
+//router.post('/cart/submit', carritoController.submitCarrito);
+router.delete('/cart/:userID/:productID', carritoController.deleteProducto);
+
+
+
+module.exports = router;
+
+
+/*
 // productList
 
 const productList = productos.productList;
@@ -80,4 +92,5 @@ router.delete('/borrar/:id', (req, res) => { // borrar producto x id
     cart = cart.filter((item) => item.id != id)
 })
 
-module.exports = router;
+*/
+
