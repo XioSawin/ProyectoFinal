@@ -1,10 +1,7 @@
 const express = require('express');
 const app = express();
 
-//const passport = require('passport');
 const jwt = require("jsonwebtoken");
-// const tokenSecret = process.env.JWT_SECRET_KEY;
-// const LocalStrategy = require('passport-local').Strategy;
 
 require('dotenv').config();
 
@@ -20,32 +17,9 @@ app.set("view engine", "hbs");
 app.set("views", "./views");
 
 app.use(express.static('public'));
-// app.use(passport.initialize());
-// app.use(passport.session());
 
 const userModel = require('./models/user');
 
-/* --------- email & sms config --------- */
-// ethereal
-const ethereal = require('./email/ethereal');
-//const twilio = require('./sms/twilio');
-
-const adminEmail = 'clovis.kris@ethereal.email';
-//const adminNumber = process.env.WHATSAPP_NUMBER;
-
-
-/* ----------------------- SERIALIZE & DESERIALIZE ----------------------- */
-
-/*
-passport.serializeUser(function(user, cb) {
-        cb(null, user);
-});
-
-passport.deserializeUser(function(obj, cb) {
-        cb(null, obj);
-});
-
-*/
 
 /* ----------------------- LOGIN ----------------------- */
 
@@ -142,31 +116,3 @@ module.exports = {
     Redirect,
     Order
 };
-
-/*
-
-const Order = (req, res) => {
-    const {order} = req.body;
-
-    let nombre = req.user.name;
-    let email = req.user.username;
-    let phoneNumber = req.user.phoneNumber;
-
-    let asunto = `Nuevo pedido de ${nombre}: ${email}`;
-    let mensaje = `Pedido: ${order}`;
-
-    let bodyWhatsApp = `Nuevo pedido de ${nombre}: ${email}. Pedido: ${order}.`
-
-
-    // ethereal 
-    ethereal.enviarEthereal(adminEmail, asunto, mensaje);
-
-    // whatsapp al admin
-    twilio.enviarWhatsApp(adminNumber, bodyWhatsApp);
-
-    // text al user
-    twilio.enviarSMS(phoneNumber.toString(), 'Pedido recibido y en proceso');
-
-    res.redirect('/');
-}
-*/
