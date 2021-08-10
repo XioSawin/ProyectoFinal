@@ -3,6 +3,7 @@
 </div>
 <form id="form" action="" enctype="application/x-www-form-urlencoded" onsubmit="return addMessage(this)">
     <input type="text" id="userEmail" placeholder="Tu email">
+    <input type="text" id="tipo" placeholder="User o System?">
     <input type="text" id="message" placeholder="Dinos algo...">
     <input type="submit" value="Enviar">
 </form>
@@ -27,10 +28,12 @@
 
         let mensaje = {
             userEmail: document.getElementById('userEmail').value,
-            tipo: 'usuario',
+            tipo: document.getElementById('tipo').value,
             timestamp: today,
             message: document.getElementById('message').value
         };
+
+        event.preventDefault();
 
         socket.emit('new-message', mensaje);
             return false;
@@ -39,7 +42,7 @@
     function renderMessages(data) {
         var html = data.map(function(elem, index) {
             return(`<div>
-                        <strong style= "color: blue">${elem.email}</strong> [${elem.timestamp}]: <i style="color:green">${elem.message}</i> </br> 
+                        <strong style= "color: blue">${elem.userEmail} - ${elem.tipo} </strong> [${elem.timestamp}]: <i style="color:green">${elem.message}</i> </br> 
                     </div`)
             }).join(" ");
         
@@ -49,10 +52,6 @@
     socket.on('messages', function(data) {
         console.log(data);
         renderMessages(data);
-    })
-
-    socket.on('mensaje-user', function(payload) {
-        console.log(payload)
     })
     
  </script>

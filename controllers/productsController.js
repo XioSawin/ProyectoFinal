@@ -1,4 +1,5 @@
 const express = require('express');
+//const { UserBindingContext } = require('twilio/lib/rest/chat/v2/service/user/userBinding');
 const app = express();
 
 app.engine(
@@ -16,6 +17,9 @@ app.use(express.static('public'));
 
 const productModel = require('./models/productos');
 
+// testing adming true
+// const administrador = true; 
+
 // obtener lista de productos all o por categoria
 const getProducts = (req, res, next) => {
     const { id } = req.params;
@@ -27,21 +31,15 @@ const getProducts = (req, res, next) => {
     }
 
     productModel.find( {} )
-        .then((productos) => res.send(productos))
+        .then((productos) => res.render("products", {productos}))
         .catch((err) => res.send(err))
 }
 
 const getByCategory = (req, res, next) => {
     const { categoria } = req.params;
 
-    if(categoria){
-        productModel.findOne( {categoria: categoria} )
-            .then((producto) => res.send(producto))
-            .catch((err) => res.send(err))
-    }
-
-    productModel.find( {} )
-        .then((productos) => res.send(productos))
+    productModel.findOne( {categoria: categoria} )
+        .then((producto) => res.send(producto))
         .catch((err) => res.send(err))
 }
 

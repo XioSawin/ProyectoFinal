@@ -64,7 +64,7 @@ const registerUser = (req, username, password, done) => {
                 // si no existe, crear el usuario
                 const {name, address, admin, phoneNumber, passwordConfirm} = req.body;
 
-                const phoneInputField = phoneNumber;
+                //const phoneInputField = phoneNumber;
                 /* const phoneInput = window.intlTelInpute(phoneInputField, {
                     utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/utils.js",
                 });
@@ -78,7 +78,7 @@ const registerUser = (req, username, password, done) => {
                         password: createHash(password),
                         name, 
                         address,
-                        phoneNumber: intPhoneNumber,
+                        phoneNumber: phoneNumber,
                         admin
                     }
                     const newUser = new userModel(user);
@@ -86,7 +86,7 @@ const registerUser = (req, username, password, done) => {
                     newUser.save()
                         .then(usuario => {
                             jwt.sign( 
-                                { id: user._id },
+                                { id: usuario._id },
                                 process.env.JWT_SECRET_KEY,
                                 { expiresIn: process.env.TOKEN_KEEP_ALIVE },
                                 (err, token) => {
@@ -95,7 +95,7 @@ const registerUser = (req, username, password, done) => {
                                     }
                                     res.json({
                                         token, 
-                                        user: {
+                                        usuario: {
                                             id: user._id,
                                             name: user.name,
                                             email: user.username,

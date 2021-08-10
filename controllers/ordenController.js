@@ -71,12 +71,14 @@ const checkout = (req, res, next) => {
 };
 
 const complete = (req, res, next) => {
-    const { numOrden } = req.body;
+    const { numOrden } = req.params;
 
     if(numOrden) {
         ordenModel.updateOne({numOrden}, {
             $set: {estado: 'completado'}
-        });
+        })
+            .then((updatedOrder) => res.send(updatedOrder))
+            .catch((err) => res.send(err));
         
     } else {
         res.status(500).send("No se encontró el número de orden.")
