@@ -5,42 +5,46 @@ E-commerce project
 
 ## **Endpoints**
 
-### MAIN
+**MAIN ROUTE = /api**
 
-* POST /login - formulario de login. If logged in ok: redirección a "welcome" screen.
+### MAIN (/api/auth/)
+
+* POST /login - formulario de login. If logged in ok: redirección a "welcome" screen. 
+  * body: {username, password}.
 * GET /faillogin - redirección cuando el login is unsuccesful.
 * POST /logout - cerrar sesión activa.
+* POST /register - formulario de registro. If registro ok: redirección a "welcome" screen.
+  * body: {username, password, name, address, phoneNumber, admin (string - "admin" o "user"}.
+* GET /failregistro - redirección cuando el registro is unsuccesful.
 
-### USERS
+### PRODUCTS (/api/products)
 
-* POST /users/register - formulario de registro. If registro ok: redirección a "welcome" screen.
-* GET /users/failregistro - redirección cuando el registro is unsuccesful.
+* GET /:id? - obtener array de productos. Todos o por ID (pasado por parámetros)
+* GET /:categoria - obtener array de productos por categoría (pasado por parámetros)
+* POST / - addProducto a la base de datos.
+  * body: {nombre, descripcion, precio, foto (http url), categoria, stock} 
+* PATCH /:id - actualizar producto en la base de datos enviando el "_id" (mongo) por parámetro.
+  * body: {nombre, descripcion, precio, foto (http url), categoria, stock} 
+* DELETE /:id - eliminar el producto de la base de datos enviando el "_id" por parámetro
 
-### PRODUCTS
+### ORDERS (/api/orders)
 
-* GET /products/:id?
-* GET /products/:categoria
-* POST /products
-* PATCH /products/:id
-* DELETE /products/:id
+* GET /:userID - obtener array de órdenes relacionadas al userID (pasado por parámetros). 
+* GET /:numOrden - obtener órden por su numOrden (pasado por parámetros)
+* POST /checkout/:userID - enviar orden completa, pasar userID por parámetros para encontrar el carrito relacionado. Obtiene datos del carrito.
+* POST /complete/:numOrden - pasar la orden a estado completed. (numOrden pasado por parámetros).
 
-### ORDERS
+### CART (/api/cart)
 
-* GET /orders/:userID
-* GET /orders/:numOrden
-* POST /orders/:userID
-* POST /orders/complete/:numOrden
+* GET /:id - obtener carrito relacionado al userID (pasar por parámetros).
+* POST / - agregar producto al carrito.
+  * body: { userID, productID, cantidad, userEmail, direccion }.
+* DELETE /:userID/:product:ID - eliminar producto del carrito. pasar por parámatetros userID (para encontrar carrito relacionado) y productID (del producto que se quiere eliminar del carrito).
 
-### CART
+### CHAT (/api/chat)
 
-* GET /cart/:id
-* POST /cart
-* DELETE /cart/:userID/:product:ID
-
-### CHAT
-
-* GET /chat
-* GET /:email
+* GET / - obtener todos los chats ingresados.
+* GET /:email - obtener chats enviados desde/hacia el email del usuario en cuestión (pasado por parámetros).
 
 ## Info adicional
 
