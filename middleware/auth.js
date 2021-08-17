@@ -19,7 +19,7 @@ const strategyOptions = {
 }
 
 const strategyJWT = {
-    secretOrKey: 'shhh_secret_token',
+    secretOrKey: process.env.JWT_SECRET_KEY,
     jwtFromRequest: ExtractJWT.fromAuthHeaderAsBearerToken(),
 };
 
