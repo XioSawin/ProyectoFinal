@@ -11,12 +11,12 @@ E-commerce project
 
 * GET /login - formulario de login. If sesión iniciada/usuario autenticado: redirección a "welcome" screen.
 * POST /login - formulario de login. If logged in ok: redirección a "welcome" screen. 
-  * body: {username, password}.
+  * body: {username, password} - enviar token via POSTMAN.
 * GET /faillogin - redirección cuando el login is unsuccesful.
 * POST /logout - cerrar sesión activa.
 
 * GET /register - formulario de registro. If sesión iniciada/usuario autenticado: redirección a "welcome" screen.
-* POST /register - formulario de registro. If registro ok: redirección a "welcome" screen.
+* POST /register - formulario de registro. 
   * body: {username, password, passwordConfirm*, name, address, phoneNumber}. (*verificación de pwrd correcta - por defecto, admin = 'user'*)
 * GET /failregistro - redirección cuando el registro is unsuccesful.
 
@@ -57,5 +57,5 @@ E-commerce project
 
 ## Info adicional
 
-Heroku URL: https://server-xio-ecommerce-finalproy.herokuapp.com/
+Heroku URL: https://coderhouse-sawin-ecommerce.herokuapp.com/
 
