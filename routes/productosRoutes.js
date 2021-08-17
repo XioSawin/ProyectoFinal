@@ -1,13 +1,12 @@
 // required
 //const mongoose = require('mongoose');
 const express = require('express');
-// const app = express();
-
+const app = express();
+const passport = require('passport');
 const router = express.Router();
 
 const productsController = require('../controllers/productsController');
 const auth = require('../middleware/auth');
-
 
 // administrador
 //bconst administrador = true;
@@ -16,15 +15,14 @@ const auth = require('../middleware/auth');
 
 router.get('/:id?', productsController.getProducts);
 
-router.get('/:categoria', productsController.getByCategory);
+router.get('/cat/:categoria', productsController.getByCategory);
 
-router.post('/', auth, productsController.addProduct);
+router.post('/', passport.authenticate('jwt', { session: false }), productsController.addProduct);
 
-router.patch('/:id', auth, productsController.updateProduct);
+router.patch('/:id', passport.authenticate('jwt', { session: false }), productsController.updateProduct);
 
-router.delete('/:id', auth, productsController.deleteProduct);
+router.delete('/:id', passport.authenticate('jwt', { session: false }), productsController.deleteProduct);
 
-module.exports = {
-    router
-}
+module.exports = router;
 
+// auth, 

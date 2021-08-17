@@ -1,6 +1,16 @@
 const express = require('express');
 const app = express();
 
+//const http = require('http');
+//const server = http.createServer(app);
+
+//const { Socket } = require('dgram');
+//const io = require('socket.io')(http);
+
+const handlebars = require('express-handlebars');
+
+app.use(express.json())
+
 app.engine(
     "hbs", 
     handlebars({
@@ -16,8 +26,9 @@ app.use(express.static('public'));
 
 /* ----------------------- CHAT W/ WEBSOCKETS ----------------------- */
 
-const messagesModel = require('./models/mensajes');
+const messagesModel = require('../models/mensajes');
 
+/*
 const getMessages = () => {
     const messages = messagesModel.find({});
 
@@ -41,16 +52,16 @@ io.on('connection', (socket) => {
         io.sockets.emit('messages', getMessages());
     })
 })
-
-const getChat = (req, res) => {
+*/
+const getChat = async(req, res) => {
     res.render("chat", {});
 }
 
-const getMsgByEmail = (req, res, next) =>  {
+const getMsgByEmail = async(req, res) =>  {
     const {email} = req.params;
 
     messagesModel.find({userEmail: email})
-        .then((messages) => res.sendStatus(messages))
+        .then((messages) => res.send(messages))
         .catch((err) => res.sendStatus(err))
 }
 

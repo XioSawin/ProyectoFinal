@@ -1,5 +1,10 @@
+const express = require('express');
+const app = express();
+
 const carritoModel = require('../models/carritos');
 const productoModel = require('../models/productos');
+
+app.use(express.json())
 
 const getTimestamp = () => {
     let date = new Date();
@@ -17,35 +22,57 @@ const getTimestamp = () => {
 };
 
 const getCarrito = (req, res, next) =>{
-    const userID = req.params.id;
+    const { userID } = req.params;
 
-    let cart = carritoModel.findOne({ userID: userID });
+    //carritoModel.findById
+    //console.log(userID);
+
+    carritoModel.findOne( {userID: userID} )
+            .then((cart) => res.send(cart))
+            .catch((err) => res.send(err))
+
+    /*
+    let cart = await carritoModel.findOne({ userID: userID });
 
     if(cart && cart.items.length>0){
-        res.send(cart);
+        return res.sendStatus(201).send(newCart)
     } else {
-        res.send(null);
+        return res.send(null);
     }
+    */
 };
 
-const addProducto = (req, res, next) => {
-    const userID = req.params.id;
-    const {productID, cantidad, userEmail, direccion, } = req.body;
+const addProducto = async (req, res, next) => {
+    
+    const { userID, productID, cantidad, userEmail, direccion } = req.body;
 
-    let cart = carritoModel.findOne({ userID: userID });
-    let product = productoModel.findOne({ _id: productID });
+    console.log("------DATOS PASADOS EN EL BODY------");
+    console.log(userID);
+    console.log(productID);
+
+    // por alguna razón devuelven info sobre la collection, y no el carrito/producto a ingresar
+    // el status es 500: INTERNAL SERVER ERROR.
+    let cart = await carritoModel.findOne({ userID: userID });
+    let product = await productoModel.findOne({_id: productID});
+
+    //console.log("------CART QUERY------");
+    // console.log(cart);
+    //console.log("------PRODUCTO QUERY------");
+    // console.log(product);
 
     if(!product) {
         res.status(400).send('Producto no encontrado');
     }
 
-    const precio = product.precio;
-    const nombre = product.nombre;
+    let precio = product.precio;
+    console.log(precio)
+    let nombre = product.nombre;
 
     if(cart) {
         // si existe la relación carrito-usuario
-        let productIndex = cart.productos.findIndex( p=> p.productID == productID);
+        let productIndex = cart.productos.indexOf( p=> p.productID == productID);
 
+        console.log(productIndex);
         // si existe producto en el carrito +1 - else, add 1.
         if(productIndex > -1){
             let productItem = cart.productos[productIndex];
@@ -56,9 +83,17 @@ const addProducto = (req, res, next) => {
         }
 
         cart.total += cantidad*precio;
-        cart = cart.save();
 
-        return res.status(201).send(cart);
+        let savedCart = await cart.save()
+        /*
+        cart.save()
+            .then( () => res.sendStatus(201).send(newCart) )
+            .catch( (err) => res.status(400).json({
+                status: 400,
+                message: err
+            })) */
+
+        return res.status(201).send(savedCart);
     } else {
         // si no existe carrito para el usuario activo.
         const newCart = new carritoModel({
@@ -67,29 +102,50 @@ const addProducto = (req, res, next) => {
             productos: [{productID, nombre, cantidad, precio}],
             direccion,
             total: cantidad*precio, 
-            timestamp = getTimestamp()
+            timestamp: getTimestamp()
         });
 
-        return res.status(201).send(newCart);
+        console.log(newCart);
+
+        let newSavedCart = newCart.save();
+
+        /*
+        newCart.save()
+            .then( () => res.sendStatus(201).send(newCart) )
+            .catch( (err) => res.status(400).json({
+                status: 400,
+                message: err
+            }))
+            */
+        return res.status(201).send(newSavedCart);
+        
     }
 };
 
 
-const deleteProducto = (req, res, next) => {
-    const { userID, productID } = req.params;
+const deleteProducto = async(req, res, next) => {
+    const { productID } = req.params;
+    const { userID } = req.body;
 
-    let cart = carritoModel.findOne({userID});
-    let productIndex = cart.productos.findIndex(p => p.productID == productID);
+    let cart = await carritoModel.findOne({ userID : userID });
+    let productIndex = await cart.productos.findIndex(p => p.productID == productID);
 
     if(productIndex > -1) {
-        // eliminar un producto del carrito del user.
         let productItem = cart.productos[productIndex];
-        cart.total -= productItem.cantidad * productItem.precio;
-        cart.productos.splice(productIndex, 1);
-    }
 
-    cart = cart.save();
-    return res.status(201).send(cart);
+        if (productItem.cantidad == 1){
+            //si ya hay uno solo, elimino el producto entero
+            cart.total -= productItem.precio;
+            cart.productos.splice(productIndex, 1);
+        }
+
+        //si hay la cantidad del producto > 1, actualizo la cantidad y el total en el carrito.
+        productItem.cantidad -= 1;
+        cart.total -= productItem.cantidad * productItem.precio;
+    } 
+
+    let savedCart = await cart.save();
+    return res.status(201).send(savedCart);
 }
 
 module.exports = {

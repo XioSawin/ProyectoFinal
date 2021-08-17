@@ -1,7 +1,11 @@
+const express = require('express');
+const app = express();
 const ordenModel = require('../models/ordenes');
 const carritoModel = require('../models/carritos');
 const userModel = require('../models/users');
-const enviarEthereal = require('../email/ethereal');
+const sendEmail = require('../email/ethereal');
+
+app.use(express.json())
 
 const getTimestamp = () => {
     let date = new Date();
@@ -23,7 +27,8 @@ const getOrden = (req, res, next) => {
 
     if(numOrden) {
         ordenModel.find({numOrden})
-        .then(orders => res.json(orders));
+            .then((orders) => res.json(orders))
+            .catch((err) => res.send(err));
     } else {
         res.status(500).send("No se encontró el número de orden.")
     }
@@ -40,15 +45,16 @@ const getOrdenesByID = (req, res, next) => {
     }
 };
 
-const checkout = (req, res, next) => {
+const checkout = async (req, res, next) => {
     const {userID} = req.params;
 
-    let cart = carritoModel.findOne({userID});
-    let user = userModel.findOne({_id: userID});
+    let cart = await carritoModel.findOne({userID});
+    let user = await userModel.findOne({_id: userID});
 
     const email = user.username;
 
-    const numOrden = ordenModel.count() + 1;
+    let numOrden = ordenModel.countDocuments({}) + 1;
+    console.log(numOrden);
 
     if(cart){
         const order = new ordenModel({
@@ -61,9 +67,11 @@ const checkout = (req, res, next) => {
             total: cart.total
         })
 
-        const data = carritoModel.findByIdAndDelete({_id: cart.id});
-        enviarEthereal(process.env.EMAIL_ADMIN, `Nueva order - user ID: ${userID}`, JSON.stringify(order));
-        enviarEthereal(email, `¡Gracias por tu orden ${user.name}! - Te enviamos el detalle`, JSON.stringify(order));
+        console.log(order);
+
+        const data = await carritoModel.findByIdAndDelete({_id: cart.id});
+        sendEmail.enviarEthereal(process.env.EMAIL_ADMIN, `Nueva order - user ID: ${userID}`, JSON.stringify(order));
+        sendEmail.enviarEthereal(email, `¡Gracias por tu orden ${user.name}! - Te enviamos el detalle`, JSON.stringify(order));
 
         return res.status(201).send(order);
     }

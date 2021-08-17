@@ -11,6 +11,7 @@ const CarritosSchema = new mongoose.Schema({
         cantidad: {type: Number, required: true, default: 1},
         precio: Number
     }],
+    //{type: Array, require: true},
     direccion: {type: String, require: true, max: 50},
     total: {type: Number, required: true, default: 0},
     timestamp: {type: String, require: true}

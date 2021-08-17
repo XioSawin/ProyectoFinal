@@ -1,10 +1,13 @@
 const express = require('express');
 const app = express();
-
-//const passport = require('passport');
+//const bodyParser = require('body-parser');
+//const session = require('express-session');
+//const bCrypt = require('bCrypt');
+const passport = require('passport');
 const jwt = require("jsonwebtoken");
+const handlebars = require('express-handlebars');
 // const tokenSecret = process.env.JWT_SECRET_KEY;
-// const LocalStrategy = require('passport-local').Strategy;
+//const LocalStrategy = require('passport-local').Strategy;
 
 require('dotenv').config();
 
@@ -20,38 +23,240 @@ app.set("view engine", "hbs");
 app.set("views", "./views");
 
 app.use(express.static('public'));
-// app.use(passport.initialize());
-// app.use(passport.session());
+app.use(express.urlencoded({extended:true}));
+app.use(express.json());
+//const userModel = require('../models/users');
 
-const userModel = require('./models/user');
+    
+/* -------------- routes -------------- */
+
+// login
+
+const logUser = async (req, res, next) => {
+    passport.authenticate('login', async(err, user, info) => {
+        try {
+            if(err) {
+                return next(err);
+            }
+            console.log('----USER FOUND PASS AUTHENTICATE----');
+            console.log(user);
+
+            if(!user && info){
+                return res.status(401).json({message: info.message});
+            }
+
+            req.login(
+                user, 
+                {session: false},
+                async(error) => {
+                    if(error){
+                        return next(error);
+                    }
+
+                    const body = {_id: user._id, email: user.username, admin: user.admin};
+                    const token = jwt.sign({user:body}, process.env.JWT_SECRET_KEY, {expiresIn: process.env.TOKEN_KEEP_ALIVE});
+
+                    console.log(token);
+                    return res.json({token});
+                    //return done(null, user);
+                }
+            );
+        } catch(error) {
+            return next(error);
+        }
+    })(req, res, next);
+}
+
+const LoginOk = (req, res, next) => {
+    console.log('----USER AUTHENTICATED----');
+    console.log(req.isAuthenticated())
+    if(req.isAuthenticated()){
+        res.render("welcome", { user }); //da constantemente false
+    }
+    else {
+        res.sendFile(process.cwd() + '/public/login.html')
+    }
+}
+
+const LoginFail = (req, res, next) => {
+    res.render('login-error', {});
+}
+
+const Logout = (req, res, next) => {
+    let nombre = req.user.name;
+
+    req.logout();
+    res.render("logout", { nombre });
+}
+
+const Redirect = (req, res, next) => {
+    res.redirect('/api/auth/login');
+}
+
+// register
+
+const register = async(req, res, next) => {
+    res.json({
+        message: 'Registro exitoso',
+        user: req.user
+    });
+}
+
+const RegisterOk = (req, res, next) => {
+    res.sendFile(process.cwd() + '/public/register.html');
+}; 
+
+const RegisterFail = (req, res) => {
+    res.render('register-error', {});
+}
+
+
+module.exports = {
+    logUser,
+    register,
+    RegisterOk,
+    RegisterFail,
+    LoginOk,
+    LoginFail,
+    Logout,
+    Redirect
+};
+
+/*
+
+
+    //logUser,
+    //registerUser,
+ -------------- hash password -------------- 
+
+const createHash = function(password) {
+    return bCrypt.hashSync(password, bCrypt.genSaltSync(10), null);
+}
+
+ -------------- check valid password -------------- 
+
+const isValidPassword = function(user, password){        
+    return bCrypt.compareSync(password, user.password);
+} 
 
 /* --------- email & sms config --------- */
 // ethereal
-const ethereal = require('./email/ethereal');
+//const ethereal = require('../email/ethereal');
 //const twilio = require('./sms/twilio');
 
-const adminEmail = 'clovis.kris@ethereal.email';
+//const adminEmail = 'clovis.kris@ethereal.email';
 //const adminNumber = process.env.WHATSAPP_NUMBER;
 
 
 /* ----------------------- SERIALIZE & DESERIALIZE ----------------------- */
 
 /*
-passport.serializeUser(function(user, cb) {
-        cb(null, user);
+
+passport.serializeUser(function(user, done) {
+        done(null, user._id);
 });
 
-passport.deserializeUser(function(obj, cb) {
-        cb(null, obj);
+passport.deserializeUser(function(id, done) {
+       userModel.findById(id, function(err, user) {
+           done (err, user);
+       });
 });
 
 */
 
+
 /* ----------------------- LOGIN ----------------------- */
 
+/*
+passport.use('login', new LocalStrategy({
+    passReqToCallback: true
+}, 
+    function(username, password, done){
+        userModel.findOne({username: username},
+            function(err, user) {
+                // if there is an error
+                if(err) {
+                    return res.status(400).json({
+                        status: 400,
+                        message: err,
+                    });
+                }
+    
+                // if username does not exist on db
+                if(!user) {
+                    return res.status(401).json({
+                        status: 401,
+                        message: 'Email incorrecto. Vuelva a intentarlo'
+                    })
+                }
+    
+                // if right user but wrong pwrd
+                if(!isValidPassword(user,password)) {
+                    return res.status(401).json({
+                        status: 401,
+                        message: 'Contraseña incorrecta. Vuelva a intentarlo'
+                    })
+                }
+            return done(null, user);
+        });
+    }
+));
+
+passport.use('register', new LocalStrategy({
+    passReqToCallback: true
+}, 
+    function(req, username, password, done){
+        findOrCreateUser = function(){
+            userModel.findOne({username: username}, function(err, user){
+                console.log(username);
+                if(err){
+                    console.log(err);
+                    return res.status(400).json({
+                        status: 400,
+                        message: err,
+                    });
+                }
+                // si user ya existe
+                if (user) {
+                    console.log('User already exists')
+                    return res.status(400).json({
+                        status: 400,
+                        message: 'Usuario ya existe. Ingrese un nuevo usuario.',
+                    });
+                } else {
+                    // si no existe, crear el usuario
+                    const {name, address, admin, phoneNumber, passwordConfirm} = req.body;
+                    const user = {
+                        username,
+                        password: createHash(password),
+                        name, 
+                        address,
+                        phoneNumber: phoneNumber,
+                        admin
+                    }
+                    const newUser = new userModel(user);
+    
+                    newUser.save()
+                        .then(() => res.send('Registro exitoso'))
+                        .catch((error) => ('Error en el regisro: ' + error))
+                    
+                    enviarEthereal(process.env.EMAIL_ADMIN, "Nuevo Registro", JSON.stringify(newUser));
+
+                    return done(null, newUser);
+            }
+        });
+    }
+    process.nextTick(findOrCreateUser);
+})
+);
+
+*/
+
+
+/*
 const logUser = (req, username, password, done) => {
     // chk en db si existe el username
-    userModel.findOne({'username': username},
+    userModel.findOne({username: username},
         function(err, user) {
             // if there is an error
             if(err) {
@@ -78,6 +283,8 @@ const logUser = (req, username, password, done) => {
             }
 
             // tout est OK
+
+            /*
             const token = jwt.sign(
                 {id: user._id},
                 process.env.JWT_SECRET_KEY, 
@@ -96,52 +303,77 @@ const logUser = (req, username, password, done) => {
                         }
                     });
                 }
-            )
-            
-            return res.status(200).json({token});
+                
+            ) */
+            /*
+            return done(null, user);
         }
     );
 }
 
-/* -------------- check valid password -------------- */
-const isValidPassword = function(user, password){        
-    return bCrypt.compareSync(password, user.password);
-} 
+const registerUser = (req, username, password, done) => {
+    findOrCreateUser = function(){
+        userModel.findOne({'username':username}, function(err, user){
+            console.log(username);
+            if(err){
+                console.log(err);
+                return res.status(400).json({
+                    status: 400,
+                    message: err,
+                });
+            }
+            // si user ya existe
+            if (user) {
+                console.log('User already exists')
+                return res.status(400).json({
+                    status: 400,
+                    message: 'Usuario ya existe. Ingrese un nuevo usuario.',
+                });
+            } else {
+                // si no existe, crear el usuario
+                const {name, address, admin, phoneNumber, passwordConfirm} = req.body;
+
+                //const phoneInputField = phoneNumber;
+                /* const phoneInput = window.intlTelInpute(phoneInputField, {
+                    utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/utils.js",
+                });
+                const intPhoneNumber = phoneInput.getNumber(); */
+
+                // validar que contraseñas ingresadas en el form sean igual
+
+                //if (password === passwordConfirm) {
+                    /*
+                    const user = {
+                        username,
+                        password: createHash(password),
+                        name, 
+                        address,
+                        phoneNumber: phoneNumber,
+                        admin
+                    }
+                    const newUser = new userModel(user);
     
-/* -------------- routes -------------- */
+                    newUser.save()
+                        .then(() => res.send('Registro exitoso'))
+                        .catch((error) => ('Error en el regisro: ' + error))
+                    
+                    enviarEthereal(process.env.EMAIL_ADMIN, "Nuevo Registro", JSON.stringify(newUser));
 
-const LoginOk = (req, res, next) => {
-    if(req.isAuthenticated()){
-        res.render("welcome", { user: user});
+                    return done(null, newUser);
+                /*} else {
+                    return res.status(400).json({
+                        status: 400,
+                        message: 'Las contraseñas no coinciden'
+                    })
+                }*/
+                /*
+            }
+        });
     }
-    else {
-        res.sendFile(process.cwd() + '/public/login.html')
-    }
+    process.nextTick(findOrCreateUser);
 }
 
-const LoginFail = (req, res, next) => {
-    res.render('login-error', {});
-}
-
-const Logout = (req, res, next) => {
-    let nombre = req.user.name;
-
-    req.logout();
-    res.render("logout", { nombre });
-}
-
-const Redirect = (req, res, next) => {
-    res.redirect('/');
-}
-
-module.exports = {
-    logUser,
-    LoginOk,
-    LoginFail,
-    Logout,
-    Redirect,
-    Order
-};
+*/
 
 /*
 

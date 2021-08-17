@@ -1,43 +1,46 @@
 /* ----------------------- IMPORTS ----------------------- */
-const express = require('express');
-const cookieParser = require('cookie-parser');
-const session = require('express-session');
+//const express = require('express');
+//const app = express();
+//const cookieParser = require('cookie-parser');
+//const session = require('express-session');
 const mongoose = require('mongoose');
-const handlebars = require('express-handlebars');
-const MongoStore = require('connect-mongo');
+//const handlebars = require('express-handlebars');
+//const MongoStore = require('connect-mongo');
 //const cluster = require('cluster');
-const compression = require('compression');
-
-const { Socket } = require('dgram');
-const io = require('socket.io')(http);
+//const compression = require('compression');
 
 //const log4js = require('log4js');
 //const nodemailer = require('nodemailer');
 require('dotenv').config();
+//const connectToDB = require('./services/db');
+const app = require('./services/server');
+const http = require('http').createServer(app)
+const io = require('socket.io')(http);
 
-//const fs = require('fs');
-//const path = require ('path');
-
-
-const app = express();
-app.use(compression());
+//const mensajes = require('./routes/mensajesRoutes.js');
 
 /* -------------- routes -------------- */
 
-const users = require('./routes/usersRoutes');
-const main = require('./routes/mainRoutes');
-const productos = require('./routes/productosRoutes');
-const orders = require('./routes/ordenRoutes');
-const cart = require('./routes/carritoRoutes');
-const mensajes = require('./routes/mensajesRoutes');
+//const auth = require('./middleware/auth');
+
+//const users = require('./routes/usersRoutes.js');
+
+/*
+const main = require('./routes/mainRoutes.js');
+const productos = require('./routes/productosRoutes.js');
+const orders = require('./routes/ordenRoutes.js');
+const cart = require('./routes/carritoRoutes.js');
+
+const { appendFileSync } = require('fs');
 
 app.use('/', main);
-app.use('/users', users);
+//app.use('/users', users);
 app.use('/products', productos);
 app.use('/orders', orders);
 app.use('/cart', cart);
 app.use('/chat', mensajes);
-
+//app.use('/auth', auth);
+*/
 
 /* ----------------------- CONSTANTS ----------------------- */
 // const portCL = 3304;
@@ -47,20 +50,20 @@ app.use('/chat', mensajes);
 
 
 /* -------------- PASSPORT -------------- */
-const passport = require('passport');
-//const FacebookStrategy = require('passport-facebook').Strategy;
-
-//const bCrypt = require('bCrypt');
-//const LocalStrategy = require('passport-local').Strategy;
-
+//const passport = require('passport');
 /* ----------------------------------------------------------------- */
 
 /* ----------------------- CONFIGURATION - MIDDLEWARES ----------------------- */
-
+/*
 app.use(express.json());
 app.use(express.urlencoded({extended:true}));
-    
-app.use(cookieParser());
+app.use(compression());
+    */
+//app.use(cookieParser());
+/*
+app.use(express.json());
+app.use(express.urlencoded({extended:true}));
+/*
 app.use(session({
     store: MongoStore.create({
         mongoUrl: process.env.DB_SESSIONS_CONN,
@@ -73,9 +76,8 @@ app.use(session({
     cookie: {
         maxAge: 60000
     }
-}));
-
-
+}));*/
+/*
 app.engine(
     "hbs", 
     handlebars({
@@ -88,12 +90,71 @@ app.set("view engine", "hbs");
 app.set("views", "./views");
 
 app.use(express.static('public'));
-app.use(passport.initialize());
-app.use(passport.session());
 
+// app.use(passport.initialize());
+// app.use(passport.session());
+
+/* ----------------------- CHAT ----------------------- */
+const messagesModel = require('./models/mensajes');
+
+/*
+const getMessages = () => {
+    const messages = messagesModel.find({ }); // por alguna razón devuelve toda la query y no el documento?
+
+    .lean()
+        .then((productos) => res.render("products", {productos}))
+        .catch((err) => res.send(err
+
+    return messages;
+} */
+
+io.on('connection', (socket)=>{
+    //const myMessages = getMessages();
+    console.log("User connected");
+
+    messagesModel.find({}).lean()
+        .then((myMessages) => socket.emit('messages', myMessages))
+        .catch((err) => res.send(err));
+
+    socket.on('new-message', function(data) {
+
+        console.log(data);
+
+        const messageSaved = new messagesModel({
+            userEmail: data.userEmail,
+            tipo: data.tipo,
+            timestamp: data.timestamp,
+            mensaje: data.mensaje
+        });
+
+        console.log(messageSaved);
+
+        messageSaved.save()
+            .then( () => io.emit('messages', messageSaved))
+            .catch( (err) => res.status(400).json({
+                status: 400,
+                message: err
+            }));
+        
+            /*
+        messagesModel.find( {} ).lean()
+            .then((myMessages) => io.socket.emit('messages', {myMessages}))
+            .catch((err) => res.send(err));
+            */
+        
+        //io.sockets.emit('messages', getMessages());
+    })
+})
 
 /* ----------------------- SERVER + DB CONNECTION ----------------------- */
-app.listen( process.env.PORT|| process.env.DEV_PORT, ()=>{
+/*
+connectToDB().then(() => {
+    http.listen(process.env.PORT || process.env.DEV_PORT, () => console.log(`Servidor iniciado. Running on PORT ${process.env.DEV_PORT}`) );
+    const io = socketIO(http);
+})*/
+
+
+http.listen( process.env.PORT|| process.env.DEV_PORT, ()=>{
     mongoose.connect(process.env.DB_CONN, 
         {
             useNewUrlParser: true, 
@@ -102,9 +163,9 @@ app.listen( process.env.PORT|| process.env.DEV_PORT, ()=>{
     )
         .then( () => console.log('Base de datos conectada') )
         .catch( (err) => console.log(err) );
-    console.log(`Running on PORT ${portCL} - PID WORKER ${process.pid}`);
+    console.log(`Running on PORT ${process.env.DEV_PORT} - PID WORKER ${process.pid}`);
         
-})
+});
 
 
 
@@ -112,6 +173,11 @@ app.listen( process.env.PORT|| process.env.DEV_PORT, ()=>{
 
 /*
 
+
+//const FacebookStrategy = require('passport-facebook').Strategy;
+
+//const bCrypt = require('bCrypt');
+//const LocalStrategy = require('passport-local').Strategy;
 
 //const FACEBOOK_APP_ID = '494152521729245'; 
 //const FACEBOOK_APP_SECRET = '0054580944040256224462c493ac1ffb'; 

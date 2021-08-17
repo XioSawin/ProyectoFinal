@@ -8,17 +8,11 @@
 
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 
-        <link
-        rel="stylesheet"
-        href="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/css/intlTelInput.css"
-        /> 
         <link rel="stylesheet" href="css/owl.carousel.min.css">
 
         <link rel="stylesheet" href="css/bootstrap.min.css">
 
         <link rel="stylesheet" href="css/style.css">
-
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/intlTelInput.min.js"></script>
 
         <title>Registrarse - Ecommerce Sawin</title>
     </head>
@@ -34,7 +28,7 @@
                             <div class="mb-4">
                                 <h3>Registrarse</h3>
                             </div>
-                            <form action="/register" method="post" role="form">
+                            <form action="/api/auth/register" method="post" role="form">
                                 <div class="form-group first">
                                     <input type="text" class="form-control" id="name" name="name" placeholder="Nombre Completo " required>
                                 </div>
@@ -47,12 +41,18 @@
                                 <div class="form-group">
                                     <input type="email" class="form-control" id="username" name="username" placeholder="Email " required>
                                 </div>
-                                <div class="form-group last mb-3">
+                                <div class="form-group">
                                     <input type="password" class="form-control" id="password" name="password" placeholder="Contraseña" required>
                                 </div>
-                                <div class="form-group last mb-3">
+                                <div class="form-group">
                                     <input type="password" class="form-control" id="passwordConfirm" name="passwordConfirm" placeholder="Repetir contraseña " required>
                                 </div>
+                                <!--
+                                
+                                <div class="form-group last mb-3">
+                                    <input type="text" class="form-control" id="admin" name="admin" placeholder="admin o user: " required>
+                                </div>
+                                -->
                                 <input type="submit" value="Registrarse" class="btn btn-block btn-primary" />
                                 
                             </form>
