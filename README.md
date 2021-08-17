@@ -1,7 +1,7 @@
 # Curso Backend - MERN Stack: Proyecto Final
 E-commerce project
 
-***currently pending final testing. will be completed by 10/08 or 11/08***
+***currently problem: unable to login/register - req.isAuthenticated() always returns FALSE***
 
 ## **Endpoints**
 
