@@ -13,11 +13,11 @@ router.get('/:id?', productsController.getProducts);
 
 router.get('/cat/:categoria', productsController.getByCategory);
 
-router.post('/', passport.authenticate('jwt', { session: false }), productsController.addProduct);
+router.post('/', productsController.addProduct);
 
-router.patch('/:id', passport.authenticate('jwt', { session: false }), productsController.updateProduct);
+router.patch('/:id', productsController.updateProduct);
 
-router.delete('/:id', passport.authenticate('jwt', { session: false }), productsController.deleteProduct);
+router.delete('/:id', productsController.deleteProduct);
 
 module.exports = router;
 
